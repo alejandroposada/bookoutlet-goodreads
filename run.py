@@ -14,14 +14,13 @@ def main(csv_path, output_path, threshold):
     results = searcher.search_all_titles()
 
     if results:
-        matches = [m["Match"] for m in results]
         with open(output_path, "w") as file:
-            for item in matches:
-                file.write(f"{item}\n")
+            for item in results:
+                file.write(f"BookOutlet: {item['Match']}, Goodreads: {item['Query']}, Match Score: {item['Score']}\n")
     else:
-        matches = []
+        results = []
 
-    print(f"Found {len(matches)} matches. Saved results in {output_path}.")
+    print(f"Found {len(results)} matches. Saved results in {output_path}.")
 
 
 if __name__ == "__main__":
