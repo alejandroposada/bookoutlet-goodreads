@@ -12,6 +12,21 @@ This tool helps you find deals on books from your Goodreads to-read shelf by sea
 4. **Multiple output formats** including interactive HTML reports
 5. **Beautiful terminal interface** with progress tracking
 
+## 📸 Interactive HTML Report
+
+By default, the tool generates a beautiful interactive HTML report (configured in `config.yaml`):
+
+![HTML Report UI](assets/html-report-ui.png)
+
+**Features:**
+- 📊 **Sortable columns** - Click any header to sort
+- 🔍 **Live search** - Filter books instantly
+- 🎚️ **Score filter** - Show only high-confidence matches
+- ✅ **Two sections** - "Certain Matches" (ISBN/100%) and "Potential Matches" (90%+)
+- 📸 **Book covers** - Visual thumbnails with direct BookOutlet links
+- 🎨 **Elegant design** - Clean typography and sophisticated styling
+- 📱 **Responsive** - Works beautifully on desktop and mobile
+
 ## ✨ New Features (v2.0)
 
 ### Phase 1: Foundation & Quick Wins
@@ -59,20 +74,22 @@ pip install -r requirements.txt
 
 ### 2. Run the Tool
 
-**Basic usage (with defaults):**
+**Basic usage (generates HTML report by default):**
 ```bash
 python run.py
+open output.html
 ```
+
+*Note: The default output format is HTML (as configured in `config.yaml`). The report includes sortable tables, search filters, and book covers.*
 
 **Custom CSV and threshold:**
 ```bash
 python run.py --csv my_books.csv --threshold 90
 ```
 
-**Generate interactive HTML report:**
+**Generate text output instead:**
 ```bash
-python run.py --format html
-open output.html
+python run.py --format text
 ```
 
 **Fast parallel processing:**
@@ -133,10 +150,10 @@ python run.py --help
 | `--config` | Path to config YAML file | `config.yaml` |
 | `--csv` | Path to Goodreads CSV export | `goodreads_library_export.csv` |
 | `--output` | Output file path (extension auto-added) | `output` |
-| `--threshold` | Minimum match score (0-100) | `100` |
-| `--format` | Output format: text, json, csv, markdown, html | `text` |
+| `--threshold` | Minimum match score (0-100) | `90` |
+| `--format` | Output format: text, json, csv, markdown, html | `html` |
 | `--parallel` | Enable parallel processing | `true` |
-| `--workers` | Number of parallel workers (1-20) | `5` |
+| `--workers` | Number of parallel workers (1-20) | `10` |
 | `--no-progress` | Disable progress bar | `false` |
 
 ### Configuration Priority
@@ -149,7 +166,19 @@ Settings are applied in this order (last wins):
 
 ## Output Formats
 
-### Text (default)
+### HTML Interactive (default)
+Generates a beautiful, fully interactive report with:
+- 📊 Sortable columns (click headers)
+- 🔍 Live search filter
+- 🎚️ Score filter dropdown
+- 📸 Book cover thumbnails
+- 🔗 Direct links to BookOutlet
+- 📱 Responsive mobile design
+- ✅ Two sections: "Certain Matches" (ISBN/100%) and "Potential Matches" (90%+)
+
+**Try it:** `python run.py` (generates `output.html` by default)
+
+### Text
 ```
 BookOutlet: The Song of Achilles by Madeline Miller, Goodreads: The Song of Achilles, Match Score: 98%
 BookOutlet: Project Hail Mary by Andy Weir, Goodreads: Project Hail Mary, Match Score: 100%
@@ -191,17 +220,6 @@ Found **45** matches out of **230** books.
 |---|---|---|---|---|
 | The Song of Achilles | The Song of Achilles by Madeline Miller | 98% | $9.99 | [View](https://...) |
 ```
-
-### HTML (Interactive)
-Generates a beautiful, fully interactive report with:
-- 📊 Sortable columns (click headers)
-- 🔍 Live search filter
-- 🎚️ Score filter dropdown
-- 📸 Book cover thumbnails
-- 🔗 Direct links to BookOutlet
-- 📱 Responsive mobile design
-
-**Try it:** `python run.py --format html && open output.html`
 
 ## How It Works
 
