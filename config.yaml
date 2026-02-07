@@ -1,0 +1,37 @@
+# BookOutlet-Goodreads Matcher Configuration
+
+# Input settings
+input:
+  csv_path: "goodreads_library_export.csv"
+  bookshelf: "to-read"
+
+# Output settings
+output:
+  path: "output"  # Extension added automatically based on format
+  format: "html"  # Options: text, json, csv, markdown, html
+
+# Matching algorithm settings
+matching:
+  threshold: 90  # Minimum match score (0-100)
+  use_isbn: true  # Use ISBN for exact matching when available
+  require_author_match: true  # RECOMMENDED: Require author similarity > 50% for fuzzy matches
+
+  # Fuzzy matching weights (must sum to 1.0)
+  # CAUTION: These are carefully tuned - modify with care!
+  weights:
+    ratio: 0.15
+    partial_ratio: 0.20
+    token_sort_ratio: 0.25
+    token_set_ratio: 0.40
+
+# Parallel processing settings
+parallel:
+  enabled: true  # Enable concurrent searches
+  workers: 10  # Number of concurrent workers (1-20)
+  delay_ms: 100  # Delay between requests in milliseconds
+
+# Display settings
+display:
+  show_progress: true  # Show progress bar
+  color: true  # Use colored output
+  verbose: false  # Show detailed debug output
