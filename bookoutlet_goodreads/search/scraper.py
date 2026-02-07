@@ -8,14 +8,32 @@ from fuzzywuzzy import fuzz, process
 
 
 class Scraper:
-    def __init__(self, titles: List[str], fuzz_thresh: int = 90):
+    def __init__(self, titles: List[str], fuzz_thresh: int = 90, book_data: List[Dict] = None, require_author_match: bool = False):
         self.titles = titles
+        self.book_data = book_data or []  # Store full book data (title, author, ISBN)
         self.scraper = cloudscraper.create_scraper()
         self.fuzz_thresh = fuzz_thresh
+        self.require_author_match = require_author_match
         self.base_url = ""
+        self.query_authors = {}
 
-    def search(self, query: str) -> str:
+    def search(self, query: str, isbn: str = None, author: str = None) -> str:
+        """
+        Search for a book by title, with optional ISBN and author for enhanced matching.
+
+        Args:
+            query: The book title to search for
+            isbn: Optional ISBN for exact matching
+            author: Optional author name for verification
+
+        Returns:
+            HTML response from the search
+        """
         print("Searching for: {}".format(query))
+        if isbn:
+            print(f"  ISBN: {isbn}")
+        if author:
+            print(f"  Author: {author}")
         return self._search(query)
 
     def preprocess_title(self, title: str) -> str:
@@ -89,14 +107,51 @@ class Scraper:
 
         return variations
 
-    def find_title(self, title: str, book_data: List[Dict]) -> tuple:
+    def find_title(self, title: str, book_data: List[Dict], query_isbn: str = None, query_author: str = None) -> tuple:
         """
-        Advanced fuzzy string matching for book titles with author verification.
+        Advanced fuzzy string matching for book titles with ISBN and author verification.
         Uses multiple scoring methods and preprocessing to improve accuracy.
         Handles title variations to improve matching.
+
+        Args:
+            title: The query title
+            book_data: List of book dictionaries from search results
+            query_isbn: Optional ISBN from Goodreads for exact matching
+            query_author: Optional author from Goodreads for verification
+
+        Returns:
+            Tuple of (found: bool, match_string: str, score: int, match_data: dict)
         """
         if not book_data:
-            return False, "N/A", 0
+            return False, "N/A", 0, {}
+
+        # Phase 1: Check for ISBN exact match FIRST (if available)
+        if query_isbn:
+            from bookoutlet_goodreads.utils.isbn import normalize_isbn, get_all_isbn_variants
+
+            # Get all ISBN variants (both ISBN-10 and ISBN-13)
+            query_isbn_variants = get_all_isbn_variants(query_isbn)
+
+            for book in book_data:
+                result_isbn = book.get('isbn', '')
+                if result_isbn:
+                    result_isbn_normalized = normalize_isbn(result_isbn)
+                    if result_isbn_normalized in query_isbn_variants:
+                        # Perfect ISBN match - return immediately with 100% score
+                        match_str = f"{book['title']} by {book.get('author', 'Unknown')}"
+                        print(f"[ISBN EXACT MATCH] Found via ISBN: {query_isbn}")
+
+                        # Return full match data
+                        match_data = {
+                            'title': book.get('title', ''),
+                            'author': book.get('author', ''),
+                            'price': book.get('price', ''),
+                            'url': book.get('url', ''),
+                            'cover_url': book.get('cover_url', ''),
+                            'isbn': result_isbn,
+                            'match_type': 'isbn_exact'
+                        }
+                        return True, match_str, 100, match_data
 
         # Extract just the titles for first-pass matching
         titles = [item.get('title', '') for item in book_data]
@@ -215,7 +270,7 @@ class Scraper:
                         best_match_data = book_data[orig_title_idx]
 
         if best_match_data is None:
-            return False, "N/A", 0
+            return False, "N/A", 0, {}
 
         # Format the best match with title and author if available
         if 'author' in best_match_data:
@@ -223,8 +278,52 @@ class Scraper:
         else:
             best_match = best_match_data['title']
 
-        # Convert score to percentage and check threshold
+        # Convert score to percentage
         score_pct = min(int(best_overall_score), 100)
+
+        # Phase 3: Apply bonuses based on additional data (AFTER base fuzzy matching)
+        match_type = 'fuzzy'
+        bonuses = []
+
+        # ISBN partial match bonus (same prefix)
+        if query_isbn and best_match_data.get('isbn'):
+            from bookoutlet_goodreads.utils.isbn import normalize_isbn
+
+            query_isbn_normalized = normalize_isbn(query_isbn)
+            result_isbn_normalized = normalize_isbn(best_match_data.get('isbn', ''))
+
+            if query_isbn_normalized and result_isbn_normalized:
+                # Check if first 9 digits match (partial ISBN match)
+                if query_isbn_normalized[:9] == result_isbn_normalized[:9]:
+                    score_pct = min(int(score_pct * 1.10), 100)  # 10% bonus
+                    bonuses.append('isbn_partial')
+                    match_type = 'fuzzy_isbn_partial'
+
+        # Author exact match bonus
+        if query_author and best_match_data.get('author'):
+            author_similarity = fuzz.token_set_ratio(
+                query_author.lower(),
+                best_match_data['author'].lower()
+            ) / 100.0
+
+            if author_similarity >= 0.95:  # Essentially exact match
+                score_pct = min(int(score_pct * 1.15), 100)  # 15% bonus
+                bonuses.append('author_exact')
+                match_type = 'fuzzy_author_exact' if 'isbn' not in match_type else 'fuzzy_isbn_author'
+
+        # Price reasonableness check (warning only, doesn't affect score)
+        price = best_match_data.get('price', '')
+        if price:
+            # Try to extract numeric price
+            import re
+            price_match = re.search(r'\$?([\d,]+\.?\d*)', price)
+            if price_match:
+                price_value = float(price_match.group(1).replace(',', ''))
+                if price_value > 50:
+                    print(f"[WARNING] High price detected: {price} for '{best_match_data['title']}'")
+
+        # Final score after bonuses
+        score_pct = min(score_pct, 100)
 
         # For debugging specific titles
         debug_titles = ["apollo murders", "there are places in the world"]
@@ -257,8 +356,22 @@ class Scraper:
 
         found = score_pct >= self.fuzz_thresh
 
+        # If require_author_match is enabled, verify author similarity for fuzzy matches
+        if found and self.require_author_match and match_type != 'isbn_exact' and query_author:
+            if best_match_data.get('author'):
+                author_similarity = fuzz.token_set_ratio(
+                    query_author.lower(),
+                    best_match_data['author'].lower()
+                ) / 100.0
+
+                if author_similarity < 0.5:  # Less than 50% author match
+                    found = False
+                    print(f"  [AUTHOR MISMATCH] Rejected: author similarity {author_similarity*100:.0f}% < 50%")
+
         print("'{}' was {}found".format(title, "" if found else "not "))
         print("Closest match ({}%): {}".format(score_pct, best_match))
+        if bonuses:
+            print(f"  Bonuses applied: {', '.join(bonuses)}")
 
         # Additional debug info
         if found:
@@ -277,7 +390,19 @@ class Scraper:
                 if 'author' in best_match_data:
                     print(f"Match author: '{best_match_data['author']}'")
 
-        return found, best_match, score_pct
+        # Prepare full match data for return
+        full_match_data = {
+            'title': best_match_data.get('title', ''),
+            'author': best_match_data.get('author', ''),
+            'price': best_match_data.get('price', ''),
+            'url': best_match_data.get('url', ''),
+            'cover_url': best_match_data.get('cover_url', ''),
+            'isbn': best_match_data.get('isbn', ''),
+            'match_type': match_type,
+            'bonuses': bonuses
+        }
+
+        return found, best_match, score_pct, full_match_data
 
     def load_authors(self, csv_path):
         """
@@ -293,18 +418,50 @@ class Scraper:
             print(f"Warning: Failed to load author data: {e}")
             self.query_authors = {}
 
-    def search_all_titles(self):
+    def search_all_titles(self, progress_callback=None):
+        """
+        Search for all titles with optional progress tracking.
+
+        Args:
+            progress_callback: Optional callback function(current, title) for progress updates
+
+        Returns:
+            List of match dictionaries
+        """
         found_titles = []
-        for t in self.titles:
+
+        for idx, t in enumerate(self.titles):
+            # Get ISBN and author if we have book_data
+            isbn = None
+            author = None
+            if self.book_data and idx < len(self.book_data):
+                isbn = self.book_data[idx].get('isbn')
+                author = self.book_data[idx].get('author')
+
+            # Update progress if callback provided
+            if progress_callback:
+                progress_callback(idx, t)
+
             # Search and check if the title was found
             print("***")
-            r = self.search(t)
+            r = self.search(t, isbn=isbn, author=author)
             book_data = self.parse_books(r)
-            found, choice, ratio = self.find_title(t, book_data)
+            found, choice, ratio, match_data = self.find_title(t, book_data, query_isbn=isbn, query_author=author)
             if book_data and found:
-                found_titles.append(
-                    {"Query": t, "Match": choice, "Score": str(ratio) + "%"}
-                )
+                result = {
+                    "Query": t,
+                    "Match": choice,
+                    "Score": str(ratio) + "%",
+                }
+                # Add enhanced data if available
+                if match_data:
+                    result["Price"] = match_data.get('price', '')
+                    result["URL"] = match_data.get('url', '')
+                    result["CoverURL"] = match_data.get('cover_url', '')
+                    result["ISBN"] = match_data.get('isbn', '')
+                    result["MatchType"] = match_data.get('match_type', 'fuzzy')
+
+                found_titles.append(result)
             print("***")
 
         print("{} titles found out of {}".format(len(found_titles), len(self.titles)))
@@ -312,50 +469,108 @@ class Scraper:
 
 
 class BookOutletSearch(Scraper):
-    def __init__(self, titles: List[str], fuzz_thresh: int = 90):
-        super().__init__(titles, fuzz_thresh=fuzz_thresh)
+    def __init__(self, titles: List[str], fuzz_thresh: int = 90, book_data: List[Dict] = None, require_author_match: bool = False):
+        super().__init__(titles, fuzz_thresh=fuzz_thresh, book_data=book_data, require_author_match=require_author_match)
         self.base_url = "https://bookoutlet.ca/browse?"
-        self.query_authors = {}
 
     def parse_books(self, response: str) -> List[Dict]:
         """
-        Parse both title and author information from BookOutlet search results
+        Parse book information from BookOutlet search results.
+
+        Extracts: title, author, price, URL, cover image, and ISBN.
+        Updated for BookOutlet's Material-UI structure (2026).
         """
         soup = BeautifulSoup(response, "html.parser")
         books = []
 
-        # Find all product containers
-        product_elements = soup.select('.product-tile')
+        # Find all product links (BookOutlet uses Material-UI React structure)
+        product_links = soup.select('a[href*="/book/"]')
 
-        if not product_elements:
-            # Fallback to just image alt attributes if we can't find product tiles
-            titles = set([img["alt"] for img in soup.find_all("img", alt=True)])
+        if not product_links:
+            # Fallback to just image alt attributes if we can't find product links
+            titles = set([img["alt"] for img in soup.find_all("img", alt=True)
+                         if 'flag' not in img["alt"].lower()])
             books = [{'title': title} for title in titles]
         else:
-            for product in product_elements:
+            for link in product_links:
                 book_info = {}
 
-                # Extract title
-                title_tag = product.select_one('.product-tile__title')
-                if title_tag:
-                    book_info['title'] = title_tag.get_text().strip()
-                else:
-                    # Fallback to img alt if title tag not found
-                    img_tag = product.select_one('img[alt]')
+                # Extract URL
+                href = link.get('href', '')
+                if href:
+                    if href.startswith('/'):
+                        book_info['url'] = 'https://bookoutlet.ca' + href
+                    else:
+                        book_info['url'] = href
+
+                # Find the data container within the link
+                container = link.select_one('[data-cnstrc-item-id]')
+                if container:
+                    # Extract ISBN from data attribute
+                    isbn_raw = container.get('data-cnstrc-item-id', '')
+                    # Remove suffix like 'B' and keep only digits and X
+                    book_info['isbn'] = re.sub(r'[^0-9X]', '', isbn_raw) if isbn_raw else ''
+
+                    # Extract title from data attribute
+                    book_info['title'] = container.get('data-cnstrc-item-name', '')
+
+                # If title not found, try img alt as fallback
+                if not book_info.get('title'):
+                    img_tag = link.select_one('img[alt]')
                     if img_tag:
                         book_info['title'] = img_tag.get('alt', '').strip()
+
+                # Skip if no title found
+                if not book_info.get('title'):
+                    continue
+
+                # Extract author from URL slug
+                # URL format: /book/title-slug/author-slug/isbn
+                # Example: /book/dune-messiah/herbert-frank/9780593548448B
+                url_parts = book_info.get('url', '').split('/')
+                if len(url_parts) >= 5:
+                    author_slug = url_parts[-2]  # Second to last part is author
+                    # Convert "herbert-frank" to "Frank Herbert"
+                    if author_slug and '-' in author_slug:
+                        parts = author_slug.split('-')
+                        # Reverse and capitalize each part
+                        author_parts = [p.capitalize() for p in reversed(parts)]
+                        book_info['author'] = ' '.join(author_parts)
+
+                # Look for price (may be in child elements)
+                # BookOutlet uses various price selectors
+                price_selectors = [
+                    '[class*="price"]',
+                    '[class*="Price"]',
+                ]
+                for selector in price_selectors:
+                    try:
+                        price_elem = link.select_one(selector)
+                        if price_elem:
+                            price_text = price_elem.get_text(strip=True)
+                            if '$' in price_text:
+                                book_info['price'] = price_text
+                                break
+                    except:
+                        continue
+
+                # If no price found with class selectors, search text content
+                if not book_info.get('price'):
+                    all_text = link.get_text()
+                    # Find price patterns like $12.99
+                    price_match = re.search(r'\$\d+\.?\d{0,2}', all_text)
+                    if price_match:
+                        book_info['price'] = price_match.group(0)
+
+                # Extract cover image
+                img_tag = link.select_one('img[src]')
+                if img_tag:
+                    src = img_tag.get('src', '')
+                    # Make absolute URL if needed
+                    if src.startswith('/'):
+                        book_info['cover_url'] = 'https://bookoutlet.ca' + src
                     else:
-                        continue  # Skip if no title found
-
-                # Extract author
-                author_tag = product.select_one('.product-tile__author')
-                if author_tag:
-                    book_info['author'] = author_tag.get_text().strip()
-
-                # Extract price if needed
-                price_tag = product.select_one('.product-tile__price')
-                if price_tag:
-                    book_info['price'] = price_tag.get_text().strip()
+                        book_info['cover_url'] = src
 
                 books.append(book_info)
 
