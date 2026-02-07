@@ -1,5 +1,9 @@
 # BookOutlet-Goodreads Matcher Configuration
 
+# Search settings
+search:
+  site: "ca"  # Options: "ca" (Canada), "com" (US)
+
 # Input settings
 input:
   csv_path: "goodreads_library_export.csv"

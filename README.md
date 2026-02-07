@@ -4,7 +4,7 @@ Find what books from your Goodreads to-read list are available on BookOutlet - n
 
 ## Overview
 
-This tool helps you find deals on books from your Goodreads to-read shelf by searching BookOutlet.ca. It features:
+This tool helps you find deals on books from your Goodreads to-read shelf by searching BookOutlet (Canadian or US site). It features:
 
 1. **ISBN-based exact matching** for perfect accuracy
 2. **Advanced fuzzy matching** with carefully tuned algorithms
@@ -97,6 +97,16 @@ python run.py --format text
 python run.py --parallel true --workers 10
 ```
 
+**Search US BookOutlet site:**
+```bash
+# Use CLI argument
+python run.py --site com
+
+# Or edit config.yaml
+# search:
+#   site: "com"
+```
+
 ## Configuration
 
 ### Using config.yaml
@@ -104,6 +114,10 @@ python run.py --parallel true --workers 10
 Create a `config.yaml` file to save your preferences:
 
 ```yaml
+# Search settings
+search:
+  site: "ca"  # Options: "ca" (Canada), "com" (US)
+
 # Input settings
 input:
   csv_path: "goodreads_library_export.csv"
@@ -147,6 +161,7 @@ python run.py --help
 
 | Argument | Description | Default |
 |----------|-------------|---------|
+| `--site` | BookOutlet site: ca (Canada), com (US) | `ca` |
 | `--config` | Path to config YAML file | `config.yaml` |
 | `--csv` | Path to Goodreads CSV export | `goodreads_library_export.csv` |
 | `--output` | Output file path (extension auto-added) | `output` |
@@ -407,7 +422,7 @@ bookoutlet-goodreads/
 
 ## Known Limitations
 
-1. **Only searches BookOutlet.ca** (Canadian site)
+1. **Single site per search** (cannot search both .ca and .com simultaneously)
 2. **No price tracking** over time
 3. **No automatic purchasing** or wishlist integration
 4. **Sequential HTML parsing** (parallel search, sequential parse)
@@ -416,12 +431,12 @@ bookoutlet-goodreads/
 ## Contributing
 
 Contributions welcome! Areas for improvement:
-- Add support for bookoutlet.com (US site)
+- Add support for searching both .ca and .com sites simultaneously
+- Support for other bookstores (AbeBooks, ThriftBooks, etc.)
 - Implement price tracking database
 - Add browser extension
 - Web UI with live updates
 - Better ISBN extraction from BookOutlet
-- Support for other bookstores
 
 ## License
 
