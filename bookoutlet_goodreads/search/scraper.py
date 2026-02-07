@@ -469,9 +469,13 @@ class Scraper:
 
 
 class BookOutletSearch(Scraper):
-    def __init__(self, titles: List[str], fuzz_thresh: int = 90, book_data: List[Dict] = None, require_author_match: bool = False):
+    def __init__(self, titles: List[str], fuzz_thresh: int = 90, book_data: List[Dict] = None, require_author_match: bool = False, site: str = "ca"):
         super().__init__(titles, fuzz_thresh=fuzz_thresh, book_data=book_data, require_author_match=require_author_match)
-        self.base_url = "https://bookoutlet.ca/browse?"
+
+        # Domain mapping
+        domain = "bookoutlet.ca" if site == "ca" else "bookoutlet.com"
+        self.base_url = f"https://{domain}/browse?"
+        self.domain = domain  # Store for URL construction
 
     def parse_books(self, response: str) -> List[Dict]:
         """
@@ -499,7 +503,7 @@ class BookOutletSearch(Scraper):
                 href = link.get('href', '')
                 if href:
                     if href.startswith('/'):
-                        book_info['url'] = 'https://bookoutlet.ca' + href
+                        book_info['url'] = f'https://{self.domain}' + href
                     else:
                         book_info['url'] = href
 
@@ -568,7 +572,7 @@ class BookOutletSearch(Scraper):
                     src = img_tag.get('src', '')
                     # Make absolute URL if needed
                     if src.startswith('/'):
-                        book_info['cover_url'] = 'https://bookoutlet.ca' + src
+                        book_info['cover_url'] = f'https://{self.domain}' + src
                     else:
                         book_info['cover_url'] = src
 

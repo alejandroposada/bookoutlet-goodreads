@@ -56,6 +56,11 @@ class DisplayConfig(BaseModel):
     verbose: bool = Field(default=False)
 
 
+class SearchConfig(BaseModel):
+    """Search configuration."""
+    site: Literal["ca", "com"] = Field(default="ca", description="BookOutlet site: ca (Canada) or com (US)")
+
+
 class Config(BaseModel):
     """Main configuration model."""
     input: InputConfig = Field(default_factory=InputConfig)
@@ -63,3 +68,4 @@ class Config(BaseModel):
     matching: MatchingConfig = Field(default_factory=MatchingConfig)
     parallel: ParallelConfig = Field(default_factory=ParallelConfig)
     display: DisplayConfig = Field(default_factory=DisplayConfig)
+    search: SearchConfig = Field(default_factory=SearchConfig)

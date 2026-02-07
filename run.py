@@ -60,7 +60,8 @@ def main(config_path=None, cli_overrides=None):
         titles,
         fuzz_thresh=config.matching.threshold,
         book_data=book_data,
-        require_author_match=config.matching.require_author_match
+        require_author_match=config.matching.require_author_match,
+        site=config.search.site
     )
 
     # Search with optional parallel processing
@@ -193,6 +194,13 @@ def parse_args():
         action="store_true"
     )
 
+    parser.add_argument(
+        "--site",
+        help="BookOutlet site: ca (Canada) or com (US)",
+        choices=['ca', 'com'],
+        default=None
+    )
+
     return parser.parse_args()
 
 
@@ -222,6 +230,9 @@ if __name__ == "__main__":
 
     if args.no_progress:
         cli_overrides.setdefault('display', {})['show_progress'] = False
+
+    if args.site:
+        cli_overrides.setdefault('search', {})['site'] = args.site
 
     # Run main with configuration
     main(config_path=args.config, cli_overrides=cli_overrides)
