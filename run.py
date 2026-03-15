@@ -12,6 +12,8 @@ from bookoutlet_goodreads.utils.console import (
     print_results_table,
     print_summary,
     print_search_header,
+    print_csv_not_found,
+    print_csv_autodetected,
 )
 from bookoutlet_goodreads.config import load_config
 from bookoutlet_goodreads.output import get_formatter
@@ -23,8 +25,19 @@ def main(config_path=None, cli_overrides=None):
     # Load configuration with CLI overrides
     config = load_config(config_path=config_path, cli_overrides=cli_overrides)
 
-    # Load the CSV
+    # Load the CSV — with auto-detection fallback
     csv_path = config.input.csv_path
+    if not Path(csv_path).exists():
+        # Try to find any goodreads export in the current directory
+        candidates = sorted(Path('.').glob('goodreads_library_export*.csv'))
+        if candidates:
+            detected = str(candidates[0])
+            print_csv_autodetected(csv_path, detected)
+            csv_path = detected
+        else:
+            print_csv_not_found(csv_path)
+            return
+
     df = pd.read_csv(csv_path)
 
     # Filter for specified bookshelf

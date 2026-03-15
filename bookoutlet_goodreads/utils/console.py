@@ -116,6 +116,46 @@ def print_search_header(total: int, csv_path: str, threshold: int):
     console.print()
 
 
+def print_csv_not_found(csv_path: str):
+    """
+    Print a helpful error message when the Goodreads CSV is not found.
+
+    Args:
+        csv_path: The path that was searched
+    """
+    message = f"""[bold red]Goodreads CSV not found:[/bold red] [yellow]{csv_path}[/yellow]
+
+[bold]To export your Goodreads library:[/bold]
+  1. Go to [link=https://www.goodreads.com/review/import]https://www.goodreads.com/review/import[/link]
+  2. Scroll down and click [bold]"Export Library"[/bold]
+  3. Save the downloaded file as [bold]goodreads_library_export.csv[/bold] in this directory
+
+Or point to an existing export:
+  [cyan]python run.py --csv /path/to/your/export.csv[/cyan]"""
+
+    panel = Panel(
+        message,
+        border_style="red",
+        title="CSV Not Found",
+        title_align="left",
+    )
+    console.print(panel)
+
+
+def print_csv_autodetected(original_path: str, detected_path: str):
+    """
+    Print a notice when a CSV was auto-detected instead of the configured path.
+
+    Args:
+        original_path: The originally configured path
+        detected_path: The auto-detected path that will be used
+    """
+    console.print(
+        f"[yellow]Note:[/yellow] [cyan]{original_path}[/cyan] not found — "
+        f"using [green]{detected_path}[/green] instead"
+    )
+
+
 def print_match_info(title: str, found: bool, match: str, score: int):
     """
     Print individual match information with color coding.
