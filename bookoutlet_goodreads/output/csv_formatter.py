@@ -23,7 +23,7 @@ class CSVFormatter(OutputFormatter):
         writer = csv.writer(output)
 
         # Write header
-        headers = ['Goodreads Title', 'BookOutlet Match', 'Score', 'Price', 'URL']
+        headers = ['Goodreads Title', 'BookOutlet Match', 'Score', 'Price', 'URL', 'Avg Rating']
         writer.writerow(headers)
 
         # Write rows
@@ -34,6 +34,7 @@ class CSVFormatter(OutputFormatter):
                 item.get('Score', ''),
                 item.get('Price', ''),
                 item.get('URL', ''),
+                item.get('AvgRating', ''),
             ]
             writer.writerow(row)
 

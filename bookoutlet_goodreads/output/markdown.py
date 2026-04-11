@@ -35,20 +35,21 @@ class MarkdownFormatter(OutputFormatter):
             return '\n'.join(lines)
 
         # Build table
-        lines.append("| Goodreads Title | BookOutlet Match | Score | Price | Link |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("| Goodreads Title | BookOutlet Match | Score | Price | Avg Rating | Link |")
+        lines.append("|---|---|---|---|---|---|")
 
         for item in results:
             query = self._escape_markdown(item.get('Query', ''))
             match = self._escape_markdown(item.get('Match', ''))
             score = item.get('Score', '')
             price = item.get('Price', '')
+            avg_rating = item.get('AvgRating', '')
             url = item.get('URL', '')
 
             # Create link if URL available
             link = f"[View]({url})" if url else ""
 
-            row = f"| {query} | {match} | {score} | {price} | {link} |"
+            row = f"| {query} | {match} | {score} | {price} | {avg_rating} | {link} |"
             lines.append(row)
 
         return '\n'.join(lines) + '\n'

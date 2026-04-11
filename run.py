@@ -49,6 +49,7 @@ def main(config_path=None, cli_overrides=None):
         book = {
             'title': row['Title'],
             'author': row.get('Author', ''),
+            'avg_rating': row.get('Average Rating', ''),
         }
 
         # Extract ISBN from either ISBN or ISBN13 column (prefer ISBN13)
@@ -83,7 +84,7 @@ def main(config_path=None, cli_overrides=None):
     if config.parallel.enabled and len(titles) > 1:
         # Parallel execution
         tasks = [
-            SearchTask(index=i, title=book['title'], isbn=book.get('isbn'), author=book.get('author'))
+            SearchTask(index=i, title=book['title'], isbn=book.get('isbn'), author=book.get('author'), avg_rating=str(book.get('avg_rating', '')) or None)
             for i, book in enumerate(book_data)
         ]
 

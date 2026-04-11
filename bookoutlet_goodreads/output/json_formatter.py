@@ -58,6 +58,8 @@ class JSONFormatter(OutputFormatter):
                 match['url'] = item['URL']
             if 'CoverURL' in item:
                 match['cover_url'] = item['CoverURL']
+            if 'AvgRating' in item:
+                match['avg_rating'] = item['AvgRating']
 
             matches.append(match)
 

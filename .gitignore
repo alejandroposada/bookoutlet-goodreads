@@ -170,4 +170,6 @@ test_*.json
 test_*.html
 test_*.md
 *.html
+!bookoutlet_goodreads/templates/*.html
+.claude/
 goodreads_library_export.csv

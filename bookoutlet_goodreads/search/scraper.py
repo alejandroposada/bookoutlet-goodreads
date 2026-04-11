@@ -461,6 +461,10 @@ class Scraper:
                     result["ISBN"] = match_data.get('isbn', '')
                     result["MatchType"] = match_data.get('match_type', 'fuzzy')
 
+                # Add Goodreads average rating if available
+                if self.book_data and idx < len(self.book_data):
+                    result["AvgRating"] = self.book_data[idx].get('avg_rating', '')
+
                 found_titles.append(result)
             print("***")
 
