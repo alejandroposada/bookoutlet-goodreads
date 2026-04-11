@@ -34,11 +34,13 @@ def print_results_table(results: List[Dict], threshold: int = 90):
     table.add_column("Goodreads Title", style="cyan", no_wrap=False, max_width=40)
     table.add_column("BookOutlet Match", style="green", no_wrap=False, max_width=40)
     table.add_column("Score", justify="right", style="yellow")
+    table.add_column("Avg Rating", justify="right", style="magenta")
 
     for item in results:
         query = item.get("Query", "N/A")
         match = item.get("Match", "N/A")
         score_str = item.get("Score", "0%")
+        avg_rating = str(item.get("AvgRating", "")) or "—"
 
         # Extract numeric score for color coding
         score_num = int(score_str.rstrip('%'))
@@ -55,7 +57,7 @@ def print_results_table(results: List[Dict], threshold: int = 90):
 
         score_text = Text(score_str, style=score_style)
 
-        table.add_row(query, match, score_text)
+        table.add_row(query, match, score_text, avg_rating)
 
     console.print(table)
 

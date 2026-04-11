@@ -14,6 +14,7 @@ class SearchTask:
     title: str
     isbn: Optional[str] = None
     author: Optional[str] = None
+    avg_rating: Optional[str] = None
 
 
 class ParallelSearcher:
@@ -78,6 +79,10 @@ class ParallelSearcher:
                     result["CoverURL"] = match_data.get('cover_url', '')
                     result["ISBN"] = match_data.get('isbn', '')
                     result["MatchType"] = match_data.get('match_type', 'fuzzy')
+
+                # Add Goodreads average rating if available
+                if task.avg_rating is not None:
+                    result["AvgRating"] = task.avg_rating
 
                 return result
 

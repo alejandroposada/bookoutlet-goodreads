@@ -21,6 +21,8 @@ class TextFormatter(OutputFormatter):
         lines = []
         for item in results:
             line = f"BookOutlet: {item['Match']}, Goodreads: {item['Query']}, Match Score: {item['Score']}"
+            if item.get('AvgRating'):
+                line += f", Avg Rating: {item['AvgRating']}"
             lines.append(line)
 
         return '\n'.join(lines) + '\n'
