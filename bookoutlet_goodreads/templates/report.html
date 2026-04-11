@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookOutlet Matches — Folio &amp; Fern</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ─── Design Tokens ─────────────────────────────────────────── */
+        :root {
+            --background:                #faf9f4;
+            --on-background:             #1b1c19;
+            --primary:                   #001a10;
+            --on-primary:                #ffffff;
+            --primary-container:         #003121;
+            --primary-fixed:             #bdedd4;
+            --primary-fixed-dim:         #a2d1b9;
+            --on-primary-fixed:          #002115;
+            --on-primary-fixed-variant:  #224f3c;
+            --secondary-fixed:           #ffdf91;
+            --secondary-fixed-dim:       #e2c375;
+            --on-secondary-fixed:        #241a00;
+            --on-secondary-fixed-variant:#594400;
+            --tertiary-container:        #1b2e26;
+            --surface:                   #faf9f4;
+            --surface-container-lowest:  #ffffff;
+            --surface-container-low:     #f5f4ef;
+            --surface-container:         #efeee9;
+            --surface-container-high:    #e9e8e3;
+            --surface-container-highest: #e3e3de;
+            --on-surface:                #1b1c19;
+            --on-surface-variant:        #424845;
+            --outline-variant:           #c2c8c3;
+            --error:                     #ba1a1a;
+            --error-container:           #ffdad6;
+            --on-error-container:        #93000a;
+
+            /* spacing */
+            --page-margin: 8.5rem;
+        }
+
+        /* ─── Reset ─────────────────────────────────────────────────── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ─── Base ──────────────────────────────────────────────────── */
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--background);
+            color: var(--on-surface);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ─── Header ────────────────────────────────────────────────── */
+        header {
+            background: linear-gradient(160deg, var(--primary) 0%, var(--primary-container) 100%);
+            color: var(--on-primary);
+            padding: 72px var(--page-margin) 56px;
+        }
+
+        header .eyebrow {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.55;
+            margin-bottom: 16px;
+        }
+
+        header h1 {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 3.5rem;
+            font-weight: 300;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+        }
+
+        header .subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8125rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            opacity: 0.6;
+        }
+
+        header .subtitle span {
+            display: inline-block;
+            margin-right: 1.5rem;
+        }
+
+        /* ─── Controls ──────────────────────────────────────────────── */
+        .controls {
+            padding: 28px var(--page-margin);
+            background: var(--surface-container-low);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--on-surface-variant);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .controls input,
+        .controls select {
+            padding: 11px 16px;
+            background: var(--surface-container-lowest);
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--on-surface);
+            box-shadow: 0 2px 8px rgba(27, 28, 25, 0.06), 0 0 0 1px rgba(194, 200, 195, 0.25);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .controls input {
+            width: 100%;
+            padding-left: 40px;
+        }
+
+        .controls input::placeholder { color: var(--on-surface-variant); opacity: 0.5; }
+
+        .controls input:focus,
+        .controls select:focus {
+            outline: none;
+            box-shadow: 0 4px 20px rgba(27, 28, 25, 0.10), 0 0 0 1px rgba(27, 44, 38, 0.3);
+        }
+
+        .stats-pill {
+            padding: 10px 18px;
+            background: var(--surface-container-lowest);
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--on-surface-variant);
+            box-shadow: 0 1px 4px rgba(27, 28, 25, 0.06), 0 0 0 1px rgba(194, 200, 195, 0.25);
+            white-space: nowrap;
+            margin-left: auto;
+        }
+
+        /* ─── Section Header ────────────────────────────────────────── */
+        .section-block {
+            padding: 0 var(--page-margin);
+            margin-top: 56px;
+        }
+
+        .section-label {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+
+        .section-label h2 {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--on-surface);
+            letter-spacing: -0.01em;
+        }
+
+        .section-label .count-tag {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 100px;
+        }
+
+        .count-tag.certain {
+            background: var(--primary-fixed);
+            color: var(--on-primary-fixed-variant);
+        }
+
+        .count-tag.potential {
+            background: var(--secondary-fixed);
+            color: var(--on-secondary-fixed-variant);
+        }
+
+        .section-desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8125rem;
+            color: var(--on-surface-variant);
+            margin-bottom: 24px;
+            letter-spacing: 0.005em;
+        }
+
+        /* ─── Table ─────────────────────────────────────────────────── */
+        .table-wrap {
+            background: var(--surface-container-lowest);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow:
+                0 2px 8px rgba(27, 28, 25, 0.04),
+                0 8px 32px rgba(27, 28, 25, 0.05);
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--surface-container-low);
+        }
+
+        th {
+            padding: 14px 20px;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--on-surface-variant);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.15s ease;
+        }
+
+        th:hover { color: var(--on-surface); }
+
+        th::after {
+            content: ' ↕';
+            opacity: 0.2;
+            font-size: 0.85em;
+        }
+        th.sort-asc::after  { content: ' ↑'; opacity: 0.6; }
+        th.sort-desc::after { content: ' ↓'; opacity: 0.6; }
+
+        tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--surface-container-low);
+        }
+
+        tbody tr:hover td:first-child {
+            border-radius: 0.25rem 0 0 0.25rem;
+        }
+        tbody tr:hover td:last-child {
+            border-radius: 0 0.25rem 0.25rem 0;
+        }
+
+        td {
+            padding: 20px 20px;
+            font-size: 0.875rem;
+            color: var(--on-surface);
+            vertical-align: middle;
+        }
+
+        /* Certain match: 4px left accent bar */
+        .certain-row td:first-child {
+            border-left: 4px solid var(--primary);
+            padding-left: 16px;
+        }
+
+        /* ─── Cover image ───────────────────────────────────────────── */
+        .cover-img {
+            width: 52px;
+            height: 78px;
+            object-fit: cover;
+            border-radius: 0.125rem;
+            display: block;
+            box-shadow:
+                0 4px 20px rgba(27, 28, 25, 0.07),
+                0 1px 4px rgba(27, 28, 25, 0.05);
+        }
+
+        .cover-placeholder {
+            width: 52px;
+            height: 78px;
+            border-radius: 0.125rem;
+            background: var(--surface-container);
+        }
+
+        /* ─── Score badge ───────────────────────────────────────────── */
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 58px;
+            padding: 5px 12px;
+            border-radius: 100px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .score-certain {
+            background: var(--primary-fixed);
+            color: var(--on-primary-fixed-variant);
+        }
+
+        .score-potential {
+            background: var(--secondary-fixed);
+            color: var(--on-secondary-fixed-variant);
+        }
+
+        .score-low {
+            background: var(--error-container);
+            color: var(--on-error-container);
+        }
+
+        /* ─── Price ─────────────────────────────────────────────────── */
+        .price {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--on-primary-fixed-variant);
+            letter-spacing: -0.01em;
+        }
+
+        /* ─── Match type chip ───────────────────────────────────────── */
+        .match-chip {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            background: var(--primary-fixed);
+            color: var(--on-primary-fixed-variant);
+        }
+
+        /* ─── Button ────────────────────────────────────────────────── */
+        .btn {
+            display: inline-block;
+            padding: 8px 18px;
+            background: var(--primary);
+            color: var(--on-primary);
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            transition: background 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .btn:hover {
+            background: var(--tertiary-container);
+            box-shadow: 0 4px 16px rgba(27, 28, 25, 0.18);
+        }
+
+        /* ─── Empty state ───────────────────────────────────────────── */
+        .empty-state {
+            padding: var(--page-margin);
+            text-align: center;
+        }
+
+        .empty-state h2 {
+            font-family: 'Newsreader', Georgia, serif;
+            font-size: 3.5rem;
+            font-weight: 300;
+            color: var(--on-surface);
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            color: var(--on-surface-variant);
+        }
+
+        /* ─── Footer ────────────────────────────────────────────────── */
+        footer {
+            margin-top: 72px;
+            padding: 32px var(--page-margin);
+            background: var(--surface-container-low);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            color: var(--on-surface-variant);
+            line-height: 1.8;
+        }
+
+        footer strong {
+            color: var(--on-surface);
+            font-weight: 500;
+        }
+
+        /* ─── Responsive ────────────────────────────────────────────── */
+        @media (max-width: 1024px) {
+            :root { --page-margin: 3rem; }
+        }
+
+        @media (max-width: 640px) {
+            :root { --page-margin: 1.25rem; }
+
+            header h1 { font-size: 2.25rem; }
+
+            .controls { flex-direction: column; }
+            .controls input, .controls select { width: 100%; min-width: 0; }
+            .stats-pill { margin-left: 0; width: 100%; text-align: center; }
+
+            .cover-img, .cover-placeholder { width: 40px; height: 60px; }
+            td, th { padding: 12px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header ─────────────────────────────────────────────────── -->
+    <header>
+        <p class="eyebrow">BookOutlet · Goodreads</p>
+        <h1>Your Reading List,<br>On Sale.</h1>
+        <p class="subtitle">
+            <span>{{ metadata.certain_matches }} certain</span>
+            <span>{{ metadata.potential_matches }} potential</span>
+            <span>{{ metadata.total_searched }} searched</span>
+        </p>
+    </header>
+
+    <!-- ── Controls ───────────────────────────────────────────────── -->
+    <div class="controls">
+        <div class="search-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" id="searchBox" placeholder="Search by title…">
+        </div>
+        <select id="sectionFilter">
+            <option value="all">All Sections</option>
+            <option value="certain">Certain Matches</option>
+            <option value="potential">Potential Matches</option>
+        </select>
+        <select id="scoreFilter">
+            <option value="0">All Scores</option>
+            <option value="95">95% and above</option>
+            <option value="90">90% and above</option>
+            <option value="85">85% and above</option>
+            <option value="80">80% and above</option>
+        </select>
+        <div class="stats-pill">
+            <span id="visibleCount">{{ metadata.total_matches }}</span> / {{ metadata.total_matches }} matches
+        </div>
+    </div>
+
+    {% if certain_matches or potential_matches %}
+
+    <!-- ── Certain Matches ─────────────────────────────────────────── -->
+    {% if certain_matches %}
+    <div class="section-block" id="section-certain">
+        <div class="section-label">
+            <h2>Certain Matches</h2>
+            <span class="count-tag certain">{{ certain_matches|length }}</span>
+        </div>
+        <p class="section-desc">ISBN exact match or 95%+ confidence with author verification — safe to buy.</p>
+        <div class="table-wrap">
+            <table class="results-table" data-section="certain">
+                <thead>
+                    <tr>
+                        <th>Cover</th>
+                        <th data-sort="goodreads">Goodreads Title</th>
+                        <th data-sort="bookoutlet">BookOutlet Match</th>
+                        <th data-sort="score">Score</th>
+                        <th data-sort="price">Price</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for match in certain_matches %}
+                    <tr class="certain-row" data-score="{{ match.score }}" data-section="certain">
+                        <td>
+                            {% if match.cover_url %}
+                            <img src="{{ match.cover_url }}" alt="Cover" class="cover-img" loading="lazy">
+                            {% else %}
+                            <div class="cover-placeholder"></div>
+                            {% endif %}
+                        </td>
+                        <td>{{ match.goodreads_title }}</td>
+                        <td>
+                            {{ match.bookoutlet_match }}
+                            {% if match.match_type == 'isbn_exact' %}
+                            <span class="match-chip">ISBN</span>
+                            {% elif match.match_type and match.match_type != 'fuzzy' %}
+                            <span class="match-chip">{{ match.match_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="score-badge score-certain">{{ match.score_pct }}</span></td>
+                        <td>
+                            {% if match.price %}<span class="price">{{ match.price }}</span>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if match.url %}<a href="{{ match.url }}" target="_blank" class="btn">View</a>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Potential Matches ────────────────────────────────────────── -->
+    {% if potential_matches %}
+    <div class="section-block" id="section-potential">
+        <div class="section-label">
+            <h2>Potential Matches</h2>
+            <span class="count-tag potential">{{ potential_matches|length }}</span>
+        </div>
+        <p class="section-desc">Fuzzy title matching — review before purchasing.</p>
+        <div class="table-wrap">
+            <table class="results-table" data-section="potential">
+                <thead>
+                    <tr>
+                        <th>Cover</th>
+                        <th data-sort="goodreads">Goodreads Title</th>
+                        <th data-sort="bookoutlet">BookOutlet Match</th>
+                        <th data-sort="score">Score</th>
+                        <th data-sort="price">Price</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for match in potential_matches %}
+                    <tr data-score="{{ match.score }}" data-section="potential">
+                        <td>
+                            {% if match.cover_url %}
+                            <img src="{{ match.cover_url }}" alt="Cover" class="cover-img" loading="lazy">
+                            {% else %}
+                            <div class="cover-placeholder"></div>
+                            {% endif %}
+                        </td>
+                        <td>{{ match.goodreads_title }}</td>
+                        <td>
+                            {{ match.bookoutlet_match }}
+                            {% if match.match_type and match.match_type != 'fuzzy' %}
+                            <span class="match-chip">{{ match.match_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="score-badge {% if match.score >= 90 %}score-potential{% else %}score-low{% endif %}">
+                                {{ match.score_pct }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if match.price %}<span class="price">{{ match.price }}</span>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if match.url %}<a href="{{ match.url }}" target="_blank" class="btn">View</a>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <h2>No matches found.</h2>
+        <p>Try adjusting your threshold or expanding your Goodreads shelf.</p>
+    </div>
+    {% endif %}
+
+    <footer>
+        Generated {{ metadata.generated_at }} &nbsp;·&nbsp; <strong>BookOutlet–Goodreads Matcher</strong>
+        &nbsp;·&nbsp; Threshold {{ metadata.threshold }}%
+        &nbsp;·&nbsp; Parallel {{ 'on' if metadata.parallel_enabled else 'off' }}
+    </footer>
+
+    <script>
+        const searchBox     = document.getElementById('searchBox');
+        const scoreFilter   = document.getElementById('scoreFilter');
+        const sectionFilter = document.getElementById('sectionFilter');
+        const visibleCount  = document.getElementById('visibleCount');
+
+        function filterTables() {
+            const term    = searchBox.value.toLowerCase();
+            const minScore = parseInt(scoreFilter.value);
+            const section  = sectionFilter.value;
+            let total = 0;
+
+            document.querySelectorAll('.results-table').forEach(table => {
+                const tSection = table.dataset.section;
+                const block    = document.getElementById('section-' + tSection);
+                const show     = section === 'all' || section === tSection;
+
+                if (!show) { if (block) block.style.display = 'none'; return; }
+                if (block) block.style.display = '';
+
+                let sectionCount = 0;
+                table.querySelectorAll('tbody tr').forEach(row => {
+                    const titles = row.children[1].textContent.toLowerCase()
+                                 + row.children[2].textContent.toLowerCase();
+                    const score  = parseInt(row.dataset.score);
+                    const visible = titles.includes(term) && score >= minScore;
+                    row.style.display = visible ? '' : 'none';
+                    if (visible) { total++; sectionCount++; }
+                });
+
+                if (block) block.style.display = sectionCount ? '' : 'none';
+            });
+
+            visibleCount.textContent = total;
+        }
+
+        searchBox.addEventListener('input', filterTables);
+        scoreFilter.addEventListener('change', filterTables);
+        sectionFilter.addEventListener('change', filterTables);
+
+        // Sorting
+        document.querySelectorAll('.results-table').forEach(table => {
+            const headers = table.querySelectorAll('th[data-sort]');
+            let currentSort = { col: null, dir: 'asc' };
+
+            headers.forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.dataset.sort;
+                    if (currentSort.col === key) {
+                        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.col = key;
+                        currentSort.dir = 'asc';
+                    }
+                    headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+                    th.classList.add('sort-' + currentSort.dir);
+
+                    const tbody = table.querySelector('tbody');
+                    const rows  = Array.from(tbody.querySelectorAll('tr'));
+
+                    rows.sort((a, b) => {
+                        let av, bv;
+                        switch (key) {
+                            case 'goodreads':
+                                av = a.children[1].textContent.trim().toLowerCase();
+                                bv = b.children[1].textContent.trim().toLowerCase();
+                                break;
+                            case 'bookoutlet':
+                                av = a.children[2].textContent.trim().toLowerCase();
+                                bv = b.children[2].textContent.trim().toLowerCase();
+                                break;
+                            case 'score':
+                                av = parseInt(a.dataset.score);
+                                bv = parseInt(b.dataset.score);
+                                break;
+                            case 'price':
+                                av = parseFloat(a.children[4].textContent.replace(/[^0-9.]/g, '')) || 0;
+                                bv = parseFloat(b.children[4].textContent.replace(/[^0-9.]/g, '')) || 0;
+                                break;
+                            default: return 0;
+                        }
+                        if (typeof av === 'string') {
+                            return currentSort.dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+                        }
+                        return currentSort.dir === 'asc' ? av - bv : bv - av;
+                    });
+
+                    rows.forEach(r => tbody.appendChild(r));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
