@@ -53,7 +53,8 @@ class HTMLInteractiveFormatter(OutputFormatter):
                 'price': item.get('Price', ''),
                 'url': item.get('URL', ''),
                 'cover_url': item.get('CoverURL', ''),
-                'match_type': match_type
+                'match_type': match_type,
+                'avg_rating': item.get('AvgRating', ''),
             }
 
             # Categorize as certain or potential

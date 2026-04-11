@@ -483,6 +483,7 @@
                         <th data-sort="bookoutlet">BookOutlet Match</th>
                         <th data-sort="score">Score</th>
                         <th data-sort="price">Price</th>
+                        <th data-sort="rating">Avg Rating</th>
                         <th>Link</th>
                     </tr>
                 </thead>
@@ -509,6 +510,7 @@
                         <td>
                             {% if match.price %}<span class="price">{{ match.price }}</span>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
                         </td>
+                        <td>{{ match.avg_rating if match.avg_rating else '—' }}</td>
                         <td>
                             {% if match.url %}<a href="{{ match.url }}" target="_blank" class="btn">View</a>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
                         </td>
@@ -537,6 +539,7 @@
                         <th data-sort="bookoutlet">BookOutlet Match</th>
                         <th data-sort="score">Score</th>
                         <th data-sort="price">Price</th>
+                        <th data-sort="rating">Avg Rating</th>
                         <th>Link</th>
                     </tr>
                 </thead>
@@ -565,6 +568,7 @@
                         <td>
                             {% if match.price %}<span class="price">{{ match.price }}</span>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
                         </td>
+                        <td>{{ match.avg_rating if match.avg_rating else '—' }}</td>
                         <td>
                             {% if match.url %}<a href="{{ match.url }}" target="_blank" class="btn">View</a>{% else %}<span style="color:var(--on-surface-variant)">—</span>{% endif %}
                         </td>
@@ -667,6 +671,10 @@
                             case 'price':
                                 av = parseFloat(a.children[4].textContent.replace(/[^0-9.]/g, '')) || 0;
                                 bv = parseFloat(b.children[4].textContent.replace(/[^0-9.]/g, '')) || 0;
+                                break;
+                            case 'rating':
+                                av = parseFloat(a.children[5].textContent.replace(/[^0-9.]/g, '')) || 0;
+                                bv = parseFloat(b.children[5].textContent.replace(/[^0-9.]/g, '')) || 0;
                                 break;
                             default: return 0;
                         }
